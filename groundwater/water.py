@@ -741,6 +741,14 @@ def numericalModel():
             flash('Value of head inlet should be greater than value of head outlet', 'danger')
         else:
             try:
+                # Option 1: insert threading here
+                # https://realpython.com/intro-to-python-threading/
+                #
+                # Option 2: write params in database and run a parallel worker in an container
+                # Infrastructure: https://github.com/inowas/flopy-calculation-service/blob/master/docker-compose.yml
+                # see example for flask app and worker on inowas-project
+                # Flask App: https://github.com/inowas/flopy-calculation-service/blob/master/app/app.py#L186
+                # Worker: https://github.com/inowas/flopy-calculation-service/blob/master/worker/worker.py#L92
                 lMax = numerical_model(Lx, Ly, ncol, nrow, prsity, al, trpt, Gamma, Cd, Ca, h1, h2, hk)
                 lMax = "%.2f" % lMax
                 bool=True
