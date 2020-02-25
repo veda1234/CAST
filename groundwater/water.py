@@ -2,6 +2,7 @@ import json
 import math
 import os
 import glob
+import shutil
 import plotly
 import plotly.graph_objs as go
 
@@ -60,6 +61,11 @@ def user_guide():
 @app.route('/complete_documentation', methods=['GET', 'POST'])
 def complete_documentation():
     return render_template('IndexDocumentation/complete_documentation.html')
+
+
+@app.route('/credits', methods=['GET', 'POST'])
+def credits():
+    return render_template('IndexDocumentation/credits.html')
 
 
 @app.route("/register", methods=['GET', 'POST'])
@@ -737,23 +743,22 @@ def numericalModel():
         h1 = form.h1.data
         h2 = form.h2.data
         hk = form.hk.data
+        id = str(current_user.id)
+        parent_dir = "C:\\Users\\Anu Grover Baliga\\Water"
+        path = os.path.join(parent_dir, id)
         if not (h1 > h2):
             flash('Value of head inlet should be greater than value of head outlet', 'danger')
         else:
             try:
-                lMax = numerical_model(Lx, Ly, ncol, nrow, prsity, al, trpt, Gamma, Cd, Ca, h1, h2, hk)
+                lMax, plot_url = numerical_model(Lx, Ly, ncol, nrow, prsity, al, trpt, Gamma, Cd, Ca, h1, h2, hk, id, path)
                 lMax = "%.2f" % lMax
                 bool=True
                 string = 'Maximum Plume Length(LMax): ' + str(lMax)
                 flash(string, 'success')
+                shutil.rmtree(path)
+                return render_template('NumericalModel/numericalNew.html', form=form, bool=bool, plot_url=plot_url)
             except Exception as e:
                 flash('No contour levels were found within the data range', 'danger')
-            # clear memory
-            for filename in glob.glob("T02_mf*"):
-                os.remove(filename)
-            for filename in glob.glob("T02_mt*"):
-                os.remove(filename)
-            os.remove("MT3D001.MAS")
-            os.remove("MT3D.CNF")
-            os.remove("mt3d_link.ftl")
+        os.chdir("..")
+        shutil.rmtree(path)
     return render_template('NumericalModel/numericalNew.html', form=form, bool=bool)
